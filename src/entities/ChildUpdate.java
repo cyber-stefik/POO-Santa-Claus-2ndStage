@@ -6,12 +6,15 @@ public final class ChildUpdate {
     private final int id;
     private final Double niceScore;
     private final ArrayList<String> giftsPreference;
+    private final String elf;
 
     public ChildUpdate(final int id, final Double niceScore,
-                       final ArrayList<String> giftsPreference) {
+                       final ArrayList<String> giftsPreference,
+                       final String elf) {
         this.id = id;
         this.niceScore = niceScore;
         this.giftsPreference = giftsPreference;
+        this.elf = elf;
     }
 
     public int getId() {
@@ -26,12 +29,7 @@ public final class ChildUpdate {
         return giftsPreference;
     }
 
-    @Override
-    public String toString() {
-        return "ChildUpdate{"
-                + "id=" + id
-                + ", niceScore=" + niceScore
-                + ", giftsPreference=" + giftsPreference
-                + '}';
+    public String getElf() {
+        return elf;
     }
 }

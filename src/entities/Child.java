@@ -1,5 +1,7 @@
 package entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 
 public final class Child {
@@ -13,6 +15,10 @@ public final class Child {
     private ArrayList<Double> niceScoreHistory;
     private Double assignedBudget;
     private ArrayList<Gift> receivedGifts;
+    @JsonIgnore
+    private int niceScoreBonus;
+    @JsonIgnore
+    private String elf;
 
     // Builder pattern
     private Child(final ChildBuilder childBuilder) {
@@ -26,6 +32,8 @@ public final class Child {
         this.niceScoreHistory = childBuilder.niceScoreHistory;
         this.assignedBudget = childBuilder.assignedBudget;
         this.receivedGifts = childBuilder.receivedGifts;
+        this.niceScoreBonus = childBuilder.niceScoreBonus;
+        this.elf = childBuilder.elf;
     }
 
     public Child(final Child child) {
@@ -39,6 +47,8 @@ public final class Child {
         niceScoreHistory = new ArrayList<>(child.getNiceScoreHistory());
         assignedBudget = child.getAssignedBudget();
         receivedGifts = new ArrayList<>(child.getReceivedGifts());
+        this.niceScoreBonus = child.getNiceScoreBonus();
+        this.elf = child.getElf();
     }
 
     public int getId() {
@@ -105,6 +115,22 @@ public final class Child {
         this.averageScore = averageScore;
     }
 
+    public int getNiceScoreBonus() {
+        return niceScoreBonus;
+    }
+
+    public void setNiceScoreBonus(final int niceScoreBonus) {
+        this.niceScoreBonus = niceScoreBonus;
+    }
+
+    public String getElf() {
+        return elf;
+    }
+
+    public void setElf(final String elf) {
+        this.elf = elf;
+    }
+
     // Builder pattern
     public static class ChildBuilder {
         private final int id;
@@ -117,10 +143,13 @@ public final class Child {
         private ArrayList<Double> niceScoreHistory;
         private Double assignedBudget;
         private ArrayList<Gift> receivedGifts;
+        private int niceScoreBonus;
+        private String elf;
 
         public ChildBuilder(final int id, final String lastName, final String firstName,
                      final int age, final String city, final Double averageScore,
-                     final ArrayList<String> giftsPreference) {
+                     final ArrayList<String> giftsPreference,
+                     final String elf) {
             this.id = id;
             this.lastName = lastName;
             this.firstName = firstName;
@@ -128,6 +157,7 @@ public final class Child {
             this.city = city;
             this.averageScore = averageScore;
             this.giftsPreferences = giftsPreference;
+            this.elf = elf;
         }
 
         /**
@@ -161,6 +191,11 @@ public final class Child {
         public final ChildBuilder receivedGifts(final ArrayList<Gift>
                                                         receivedGifts1) {
             this.receivedGifts = new ArrayList<>();
+            return this;
+        }
+
+        public final ChildBuilder niceScoreBonus(final int niceScoreBonus1) {
+            this.niceScoreBonus = niceScoreBonus1;
             return this;
         }
 

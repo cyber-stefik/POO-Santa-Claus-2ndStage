@@ -13,5 +13,4 @@ public final class Children {
     public ArrayList<Child> getChildren() {
         return children;
     }
-
 }
