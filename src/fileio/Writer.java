@@ -28,8 +28,7 @@ public final class Writer {
      * @return An JSON Object
      * @throws IOException in case of exceptions to reading / writing
      */
-    public void writeFile(final AnnualChildren
-                                        annualChildren,
+    public void writeFile(final AnnualChildren annualChildren,
                                 final String filePath2) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(new

@@ -80,6 +80,8 @@ public final class InputLoader {
                         annualChange).get(Constants.NEWCHILDREN));
                 JSONArray jsonChildrenUpdates = ((JSONArray) ((JSONObject)
                         annualChange).get(Constants.CHILDRENUPDATES));
+                String strategy = String.valueOf(((JSONObject)
+                        annualChange).get(Constants.STRATEGY));
 
                 createGifts(newGifts, jsonNewGifts);
                 for (Object jsonChild : jsonNewChildren) {
@@ -90,7 +92,7 @@ public final class InputLoader {
                 }
                 annualChanges.add(new AnnualChange(
                         Double.valueOf(newSantaBudget),
-                        newGifts, newChildren, childUpdates));
+                        newGifts, newChildren, childUpdates, strategy));
             }
         } catch (ParseException | IOException e) {
             e.printStackTrace();
@@ -109,12 +111,14 @@ public final class InputLoader {
         if (niceScore == "null") {
             niceScore = "-1";
         }
-
+        String elf = String.valueOf(((JSONObject)
+                jsonChild).get(Constants.ELF));
         childUpdates.add(new ChildUpdate(
                 Integer.parseInt(id),
                 Double.valueOf(niceScore),
                 Utils.convertJSONArray((JSONArray)
-                        jsonChild.get(Constants.GIFTSPREFERENCES))));
+                        jsonChild.get(Constants.GIFTSPREFERENCES)),
+                elf));
     }
 
     private void createGifts(final ArrayList<Gift> newGifts,
@@ -126,9 +130,11 @@ public final class InputLoader {
                     .get(Constants.PRICE));
             String category = String.valueOf(((JSONObject) newGift)
                     .get(Constants.CATEGORY));
+            String quantity = String.valueOf(((JSONObject) newGift)
+                    .get(Constants.QUANTITY));
             newGifts.add(new Gift(productName,
                     Double.valueOf(price),
-                    category));
+                    category, Integer.parseInt(quantity)));
         }
     }
 
@@ -146,6 +152,10 @@ public final class InputLoader {
                 .get(Constants.CITY));
         String niceScore = String.valueOf(jsonChild
                 .get(Constants.NICESCORE));
+        String niceScoreBonus = String.valueOf(jsonChild
+                .get(Constants.NICESCOREBONUS));
+        String elf = String.valueOf(jsonChild
+                .get(Constants.ELF));
         // add a child in the database using Builder strategy
         children.add(new Child.ChildBuilder(
                 Integer.parseInt(id),
@@ -156,7 +166,7 @@ public final class InputLoader {
                 Double.valueOf(niceScore),
                 Utils.convertJSONArray((JSONArray)
                         jsonChild.get(Constants.GIFTSPREFERENCES)
-                ))
+                ), elf)
                         .niceScoreHistory(null)
                         .assignedBudget(0.0)
                         .receivedGifts(null)
