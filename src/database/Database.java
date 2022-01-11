@@ -14,6 +14,7 @@ public final class Database {
     private ArrayList<Child> children = new ArrayList<>();
     private ArrayList<Gift> gifts = new ArrayList<>();
     private ArrayList<AnnualChange> annualChanges = new ArrayList<>();
+
     // Singleton
     private static final Database INSTANCE = new Database();
     private static int instanceCount = 0;
