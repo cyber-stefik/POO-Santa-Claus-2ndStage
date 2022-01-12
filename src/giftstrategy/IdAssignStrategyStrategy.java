@@ -1,8 +1,15 @@
 package giftstrategy;
 
 import database.Database;
+import entities.Child;
+import entities.Gift;
+import utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
+    private static final int YOUNGADULTAGE = 18;
     private Database database;
 
     public IdAssignStrategyStrategy(Database database) {
@@ -18,8 +25,56 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
     }
 
     @Override
-    public Database getGiftsByStrategy() {
-        // id strategy
-        return database;
+    public void getGiftsByStrategy() {
+        ArrayList<Child> children = database.getChildren();
+        children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
+        addGifts(children);
+    }
+
+    public void addGifts(ArrayList<Child> children) {
+        for (Child child : children) {
+            // getting the budget of every child
+            Double childAssignedBudget = child.getAssignedBudget();
+            // getting every preference of every child
+            for (String preference : child.getGiftsPreferences()) {
+                // array in which I'll add gifts in the same category
+                ArrayList<Gift> preferenceGifts = new ArrayList<>();
+                for (Gift gift : database.getPresents()) {
+                    // verify if the gift category is in the preferred category
+                    // of the child
+                    if (gift.getCategory().contains(preference)) {
+                        // verify if the budget allows santa to give the gift
+                        if (childAssignedBudget - gift.getPrice() > 0
+                                && gift.getQuantity() > 0) {
+                            preferenceGifts.add(gift);
+                        }
+                    }
+                }
+                // sort the preferenceGifts by price, so the first one will be
+                // the cheapest
+                sortPreferenceGifts(preferenceGifts);
+                for (Gift gift : preferenceGifts) {
+                    int quantity = gift.getQuantity();
+                    childAssignedBudget -= gift.getPrice();
+                    if (childAssignedBudget >= 0) {
+                        child.getReceivedGifts().add(gift);
+                        gift.setQuantity(quantity - 1);
+                    }
+                    if (gift.getQuantity() == 0) {
+                        preferenceGifts.remove(gift);
+                    }
+                    // add the cheapest gift
+                    // update the assigned budget
+                    break;
+                }
+            }
+        }
+    }
+
+    private static void sortPreferenceGifts(final ArrayList<Gift>
+                                                    preferenceGifts) {
+        Comparator<Gift> comparator;
+        comparator = Comparator.comparing(Gift::getPrice);
+        preferenceGifts.sort(comparator);
     }
 }
