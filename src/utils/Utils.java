@@ -1,8 +1,11 @@
 package utils;
 
+import entities.Child;
+import entities.Gift;
 import org.json.simple.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public final class Utils {
     private Utils() { }

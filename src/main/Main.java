@@ -39,6 +39,7 @@ public final class Main {
         for (File file : Objects.requireNonNull(directory.listFiles())) {
             String filename = file.toString();
             String filepath = getOutputName(filename);
+            System.out.println(filename);
             action(file.getAbsolutePath(), filepath);
         }
         Checker.calculateScore();
