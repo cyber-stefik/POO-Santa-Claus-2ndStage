@@ -44,7 +44,7 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
                     // of the child
                     if (gift.getCategory().contains(preference)) {
                         // verify if the budget allows santa to give the gift
-                        if (childAssignedBudget - gift.getPrice() > 0
+                        if (childAssignedBudget >= gift.getPrice()
                                 && gift.getQuantity() > 0) {
                             preferenceGifts.add(gift);
                         }
@@ -56,16 +56,24 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
                 for (Gift gift : preferenceGifts) {
                     int quantity = gift.getQuantity();
                     childAssignedBudget -= gift.getPrice();
-                    if (childAssignedBudget >= 0) {
-                        child.getReceivedGifts().add(gift);
-                        gift.setQuantity(quantity - 1);
+                    int ok = 1;
+                    if (!child.getReceivedGifts().contains(gift)
+                            && childAssignedBudget >= 0) {
+                        for (int i = 0; i < child.getReceivedGifts().size();
+                             i++) {
+                            if (child.getReceivedGifts().get(i)
+                                    .getCategory().contains(preference)) {
+                                ok = 0;
+                            }
+                        }
+                        if (ok == 1) {
+                            child.getReceivedGifts().add(gift);
+                            gift.setQuantity(quantity - 1);
+                        }
                     }
-                    if (gift.getQuantity() == 0) {
-                        preferenceGifts.remove(gift);
-                    }
+                    break;
                     // add the cheapest gift
                     // update the assigned budget
-                    break;
                 }
             }
         }
