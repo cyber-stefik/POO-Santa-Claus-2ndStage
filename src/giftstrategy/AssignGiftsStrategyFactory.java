@@ -6,9 +6,9 @@ import database.Database;
 public class AssignGiftsStrategyFactory {
     /**
      *
-     * @param database
-     * @param strategy
-     * @return
+     * @param database the database that contains all of the information
+     * @param strategy the strategy type
+     * @return the database, with given gifts
      */
     public static AssignGiftsStrategy createStrategy(final Database database,
                                                      final String strategy) {

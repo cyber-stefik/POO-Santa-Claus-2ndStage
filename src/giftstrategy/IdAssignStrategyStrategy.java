@@ -32,18 +32,20 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
     }
 
     /**
-     *
+     * gives gifts to children
      */
     @Override
     public void getGiftsByStrategy() {
         ArrayList<Child> children = database.getChildren();
+        // remove the young adults
         children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
+        // call the method to give gifts
         addGifts(children);
     }
 
     /**
      *
-     * @param children
+     * @param children list of children
      */
     public void addGifts(final ArrayList<Child> children) {
         for (Child child : children) {
@@ -58,6 +60,7 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
                     // of the child
                     if (gift.getCategory().contains(preference)) {
                         // verify if the budget allows santa to give the gift
+                        // and if he has the quantity to do that
                         if (childAssignedBudget >= gift.getPrice()
                                 && gift.getQuantity() > 0) {
                             preferenceGifts.add(gift);
@@ -69,25 +72,32 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
                 sortPreferenceGifts(preferenceGifts);
                 for (Gift gift : preferenceGifts) {
                     int quantity = gift.getQuantity();
+                    // update the assigned budget
                     childAssignedBudget -= gift.getPrice();
                     int ok = 1;
+                    // verify if the child already has been given the gift
+                    // and if the santa budget allowed santa to give the gift
                     if (!child.getReceivedGifts().contains(gift)
                             && childAssignedBudget >= 0) {
                         for (int i = 0; i < child.getReceivedGifts().size();
                              i++) {
+                            // verify if the child already has a gift from a
+                            // preferred category
                             if (child.getReceivedGifts().get(i)
                                     .getCategory().contains(preference)) {
                                 ok = 0;
+                                break;
                             }
                         }
+                        // give the gift
                         if (ok == 1) {
+                            // add the cheapest gift
                             child.getReceivedGifts().add(gift);
+                            // update the quantity
                             gift.setQuantity(quantity - 1);
                         }
                     }
                     break;
-                    // add the cheapest gift
-                    // update the assigned budget
                 }
             }
         }
@@ -95,7 +105,7 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
 
     /**
      *
-     * @param preferenceGifts
+     * @param preferenceGifts the gifts in a category
      */
     private static void sortPreferenceGifts(final ArrayList<Gift>
                                                     preferenceGifts) {

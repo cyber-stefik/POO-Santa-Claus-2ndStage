@@ -194,6 +194,11 @@ public final class Child {
             return this;
         }
 
+        /**
+         *
+         * @param niceScoreBonus1 set the nice score bonus
+         * @return
+         */
         public final ChildBuilder niceScoreBonus(final int niceScoreBonus1) {
             this.niceScoreBonus = niceScoreBonus1;
             return this;
@@ -207,5 +212,4 @@ public final class Child {
             return new Child(this);
         }
     }
-
 }

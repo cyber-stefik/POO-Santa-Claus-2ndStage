@@ -36,4 +36,5 @@ public final class Gift {
     public void setQuantity(final int quantity) {
         this.quantity = quantity;
     }
+
 }

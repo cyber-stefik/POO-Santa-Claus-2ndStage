@@ -170,6 +170,7 @@ public final class InputLoader {
                         .niceScoreHistory(null)
                         .assignedBudget(0.0)
                         .receivedGifts(null)
+                        .niceScoreBonus(Integer.parseInt(niceScoreBonus))
                 .build());
     }
 }

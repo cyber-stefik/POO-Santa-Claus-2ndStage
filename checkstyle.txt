@@ -1,2 +1,4 @@
 Starting audit...
+[ERROR] C:\Users\stefa\OneDrive\Desktop\Santa-Claus-POO-2ndStage\.\src\giftstrategy\AssignGiftsStrategyFactory.java:6:1: Utility classes should not have a public or default constructor. [HideUtilityClassConstructor]
 Audit done.
+Checkstyle ends with 1 errors.

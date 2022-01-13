@@ -9,6 +9,8 @@ import entities.Gift;
 import fileio.Writer;
 import entities.AnnualChildren;
 import entities.ChildUpdate;
+import giftstrategy.AssignGiftsStrategy;
+import giftstrategy.AssignGiftsStrategyFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +21,8 @@ public final class Action {
     public static final int BABY = 10;
     public static final int KID = 12;
     public static final int BABYAGE = 5;
+    public static final double PERCENT = 100;
+    public static final int CHANGE = 30;
 
     private Action() {
 
@@ -78,10 +82,14 @@ public final class Action {
             // calculating the assigned budget for every child
             Double budgetUnit = santaBudget / niceScoreSum;
             for (Child child : children) {
-                child.setAssignedBudget(budgetUnit * child.getAverageScore());
+                double assignedBudget = checkElf(budgetUnit, child);
+                child.setAssignedBudget(assignedBudget);
             }
+            // updating the children and gifts
+            database.setChildren(children);
+            database.setPresents(gifts);
             // method to give gifts to children
-            receiveGifts(database, children);
+            receiveGifts(database, i - 1);
             ArrayList<Child> children2 = new ArrayList<>();
             for (Child child : children) {
                 // copying every child from the children list in a new list, so the
@@ -97,7 +105,7 @@ public final class Action {
         writer.writeFile(annualChildren1, filePath2);
     }
 
-    private static void roundZero(final Database database) throws IOException {
+    private static void roundZero(final Database database) {
         // getting the children from the database
         ArrayList<Child> children = database.getChildren();
         // calculating the sum of every child's average score
@@ -112,7 +120,14 @@ public final class Action {
             } else {
                 // for the rest of the children, the average score will be
                 // the first score from the score history list
-                child.setAverageScore(child.getNiceScoreHistory().get(0));
+                double averageScore = child.getNiceScoreHistory().get(0);
+                averageScore += averageScore * child.getNiceScoreBonus()
+                                / PERCENT;
+                if (averageScore > BABY) {
+                    // reusing constant, BABY = 10
+                    averageScore = BABY;
+                }
+                child.setAverageScore(averageScore);
             }
             // adding to the sum
             niceScoreSum += child.getAverageScore();
@@ -120,7 +135,7 @@ public final class Action {
         // setting the budget for every child
         setChildAssignedBudget(database, niceScoreSum);
         // method to give every child gifts
-        receiveGifts(database, children);
+        receiveGifts(database, -1);
     }
 
     /**
@@ -187,6 +202,7 @@ public final class Action {
                                     newPreference);
                         }
                     }
+                    child.setElf(childUpdate.getElf());
                 }
             }
         }
@@ -209,8 +225,15 @@ public final class Action {
                 for (Double score : child.getNiceScoreHistory()) {
                     average += score;
                 }
-                child.setAverageScore(average / child.getNiceScoreHistory()
-                        .size());
+                double averageScore = average / child.getNiceScoreHistory()
+                        .size();
+                averageScore += averageScore * child.getNiceScoreBonus()
+                                / PERCENT;
+                if (averageScore > BABY) {
+                    // reusing constant, BABY = 10
+                    averageScore = BABY;
+                }
+                child.setAverageScore(averageScore);
             } else if (child.getAge() <= YOUNGADULTAGE) {
                 // calculating the pondered of score history for teens
                 double pondered = 0.0;
@@ -223,7 +246,14 @@ public final class Action {
                 for (int j = 1; j <= count; j++) {
                     denominator += j;
                 }
-                child.setAverageScore(pondered / denominator);
+                double averageScore = pondered / denominator;
+                averageScore += averageScore * child.getNiceScoreBonus()
+                            / PERCENT;
+                if (averageScore > BABY) {
+                    // reusing constant, BABY = 10
+                    averageScore = BABY;
+                }
+                child.setAverageScore(averageScore);
             }
             // add to the niceScoreSum every child's average score
             niceScoreSum += child.getAverageScore();
@@ -244,59 +274,82 @@ public final class Action {
         Double budgetUnit = database.getSantaBudget() / niceScoreSum;
         for (Child child : children) {
             // assign the budget for every child with the given formula
-            child.setAssignedBudget(child.getAverageScore() * budgetUnit);
+            double assignedBudget = checkElf(budgetUnit, child);
+            child.setAssignedBudget(assignedBudget);
         }
+    }
+
+    /**
+     *
+     * @param budgetUnit the budget unit to calculate the assigned budget
+     * @param child child which will have the assigned budget calculated
+     *              if he has an elf
+     * @return the final budget
+     */
+    private static double checkElf(final Double budgetUnit,
+                                   final Child child) {
+        double assignedBudget = child.getAverageScore() * budgetUnit;
+        if (child.getElf().equals("black")) {
+            assignedBudget -= assignedBudget * CHANGE / PERCENT;
+        } else if (child.getElf().equals("pink")) {
+            assignedBudget += assignedBudget * CHANGE / PERCENT;
+        }
+        return assignedBudget;
     }
 
     /**
      *
      * @param database database which contains info about every entity
-     * @param children list with every child that will receive gifts
      */
-    private static void receiveGifts(final Database database,
-                                    final ArrayList<Child> children) {
+    private static void receiveGifts(final Database database, final int
+                                     year) {
         // getting every child
+        ArrayList<Child> children = database.getChildren();
+        // if the year is -1, it means that the round 0 is happening and the
+        // children will receive gifts by id
+        if (year == -1) {
+            AssignGiftsStrategy assignGiftsStrategy = AssignGiftsStrategyFactory
+                    .createStrategy(database, "id");
+            assignGiftsStrategy.getGiftsByStrategy();
+        } else {
+            // otherwise, call the strategy design pattern to give gifts
+            String strategy = database.getAnnualChanges().get(year)
+                            .getStrategy();
+            AssignGiftsStrategy assignGiftsStrategy = AssignGiftsStrategyFactory
+                    .createStrategy(database, strategy);
+            assignGiftsStrategy.getGiftsByStrategy();
+        }
+        // yellow elf
         for (Child child : children) {
-            // getting the budget of every child
-            Double childAssignedBudget = child.getAssignedBudget();
-            // getting every preference of every child
-            for (String preference : child.getGiftsPreferences()) {
-                // array in which I'll add gifts in the same category
+            // verify if the child has yellow elf and hasn't received any
+            // gifts
+            if (child.getElf().equals("yellow")
+                    && child.getReceivedGifts().isEmpty()) {
                 ArrayList<Gift> preferenceGifts = new ArrayList<>();
                 for (Gift gift : database.getPresents()) {
-                    // verify if the gift category is in the prefered category
-                    // of the child
-                    if (gift.getCategory().contains(preference)) {
-                        // verify if the budget allows santa to give the gift
-                        if (childAssignedBudget - gift.getPrice() > 0) {
+                    // add the gifts of the preferred category
+                    // that can still be given to children
+                    if (gift.getCategory().contains(child.getGiftsPreferences().get(0))) {
+                        if (gift.getQuantity() >= 0) {
                             preferenceGifts.add(gift);
                         }
                     }
                 }
-                // sort the preferenceGifts by price, so the first one will be
-                // the cheapest
-                sortPreferenceGifts(preferenceGifts);
+                // sort by price so the first one will be the cheapest
+                Comparator<Gift> comparator;
+                comparator = Comparator.comparing(Gift::getPrice);
+                preferenceGifts.sort(comparator);
                 for (Gift gift : preferenceGifts) {
-                    // add the cheapest gift
-                    child.getReceivedGifts().add(gift);
-                    // update the assigned budget
-                    childAssignedBudget -= gift.getPrice();
+                    int quantity = gift.getQuantity();
+                    // verify if the gift can still be given
+                    if (gift.getQuantity() > 0) {
+                        child.getReceivedGifts().add(gift);
+                        gift.setQuantity(quantity - 1);
+                    }
                     break;
                 }
             }
         }
-    }
-
-    /**
-     *
-     * @param preferenceGifts arraylist of gifts in the same category which
-     *                        will be sorted by price
-     */
-    private static void sortPreferenceGifts(final ArrayList<Gift>
-                                                     preferenceGifts) {
-        Comparator<Gift> comparator;
-        comparator = Comparator.comparing(Gift::getPrice);
-        preferenceGifts.sort(comparator);
     }
 
 }

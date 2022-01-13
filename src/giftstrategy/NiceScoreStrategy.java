@@ -39,16 +39,20 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
     @Override
     public void getGiftsByStrategy() {
         ArrayList<Child> children = new ArrayList<>(database.getChildren());
+        // remove the young adults
         children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
+        // sort the children by average score
+        // and by id if 2 children have the same score
         sortChildrenAverage(children);
+        // method to give gifts to children
         addGifts(children);
+        // sort the children by id at the end, so the database remains intact
         sortChildrenId(children);
-        database.setChildren(children);
     }
 
     /**
      *
-     * @param children
+     * @param children list of children
      */
     public void addGifts(final ArrayList<Child> children) {
         for (Child child : children) {
@@ -63,6 +67,7 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
                     // of the child
                     if (gift.getCategory().contains(preference)) {
                         // verify if the budget allows santa to give the gift
+                        // and if he has the quantity to do that
                         if (childAssignedBudget >= gift.getPrice()
                                 && gift.getQuantity() > 0) {
                             preferenceGifts.add(gift);
@@ -74,15 +79,18 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
                 sortPreferenceGifts(preferenceGifts);
                 for (Gift gift : preferenceGifts) {
                     int quantity = gift.getQuantity();
+                    // update the assigned budget
                     childAssignedBudget -= gift.getPrice();
+                    // verify if the child already has been given the gift
+                    // and if the santa budget allowed santa to give the gift
                     if (!child.getReceivedGifts().contains(gift)
                         && childAssignedBudget >= 0) {
+                        // add the cheapest gift
                         child.getReceivedGifts().add(gift);
+                        // update the quantity
                         gift.setQuantity(quantity - 1);
                         break;
                     }
-                    // add the cheapest gift
-                    // update the assigned budget
                 }
             }
         }
@@ -101,6 +109,8 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
     }
 
     private static void sortChildrenAverage(final ArrayList<Child> children) {
+        // sort the children by the average first and when 2 average scores
+        // are equal, sort those children by id
         Collections.sort(children, new Comparator<Child>() {
             @Override
             public int compare(final Child o1, final Child o2) {

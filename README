@@ -1,9 +1,18 @@
 # Copyright Stefanita Ionita, 324CA, 2021-2022
 
+Am pastrat README de la prima etapa, fiind incadrata fiecare bucata in
+Etapa 1 { }. Am scris update-uri dupa caz.
+
 Package action:
 ********************************************************************************
 
 Action class:
+Update: Metoda receiveGifts aplica acum cele doua design patterns, anume
+strategy si factory, care ofera cadouri in functie de strategia ceruta.
+roundZero si solve au ramas aproape neschimbate, mai exact doar am calculat
+noile bugete (adica am verificat elfii, am adaugat niceScoreBonus).
+
+Etapa 1 {
 In action mi-am declarat cateva constante, desi puteam sa o fac in Constants,
 dar nu mi-am dat seama pe moment. In aceasta clasa am metoda solve care rezolva
 tema, incepand cu preluarea listelor de copii, cadouri si schimbarile anuale.
@@ -17,60 +26,101 @@ ce contine o lista de liste de copii pentru a putea folosi clasa writer, mai
 exact sa pot face scrierea in fisierul json de output.
 Am detaliat metodele folosind comentarii si consider ca sunt suficiente pentru
 intelegerea codului, de aceea nu am detaliat si in README.
+}
 
 Package database:
 ********************************************************************************
 
 Database class:
+Update: nimic.
+
+Etapa 1 {
 Aceasta clasa contine informatiile luate din json-urile de input, care contine
 numarul de ani pe care se va desfasura Craciunul, samd. Am metoda addData, care
 se foloseste de inputul creat in clasele InputLoader si Input, pentru a putea
 scrie datele din json in baza mea de date, ca mai tarziu sa o folosesc in
 rezolvarea proiectului.
+}
 
 Package entities:
 ********************************************************************************
 
 AnnualChange class:
+Update: nimic.
+
+Etapa 1 {
 Contine informatii pentru fiecare schimbare anuala, mai exact un nou buget al
 mosului, samd.
+}
 
 AnnualChildren class:
+Update: nimic.
+
+Etapa 1 {
 Clasa, as putea sa spun auxiliara, care contine un ArrayList<Children>, mai
 exact o lista de liste de copii, folosita pentru scrierea in json exact cum este
 cerut de ref-uri.
+}
 
 Child class:
+Update: Campuri noi, niceScoreBonus si elf.
+
+Etapa 1 {
 Aceasta clasa contine informatii despre copii, clasa la care am folosit builder
 pattern, niceScoreHistory, assignedBudget si receivedGifts fiind campurile
 optionale.
+}
 
 Children class:
+Update: nimic.
+
+Etapa 1 {
 Este folosita in clasa AnnualChildren pentru scrierea in fisierul de output.
+}
 
 ChildUpdate class:
+Update: nimic.
+
+Etapa 1 {
 Contine informatii despre update-ul unui copil de la an la an.
+}
 
 Gift class:
+Update: fiecare cadou are o cantitate.
+
+Etapa 1 {
 Clasa gift contine informatii despre cadouri.
+}
 
 Package fileio:
 ********************************************************************************
 
 Input Class:
+Update: nimic.
+
+Etapa 1 {
 Contine informatiile din fisierele json de input.
+}
 
 InputLoader Class:
+Update: creearea unui copil folosind ChildBuilder pentru niceScoreBonus si
+set pentru elf, quantity pentru gift.
+
+Etapa 1 {
 Asemanator cu InputLoader de la tema, preia informatiile din fisierele json
 folosindu-se de constante si adaugand, pe rand, informatiile in liste, la final
 fiind si ele adaugate intr-un obiect de tip Input.
+}
 
 Writer class:
+Update: nimic
+
+Etapa 1 {
 Aceasta clasa contine metoda care scrie in fisierul de output, avand ca
 parametri annualChildren, lista de liste de copii, si path-ul catre fisierul de
 output. Am folosit un ObjectMapper pentru scrierea identica a datelor cu cea
 din ref-uri.
+}
 
-Feedback: Aceasta etapa din proiect a fost mult mai ok fata de tema, enuntul
-a fost mult mai clar si sper sa o tineti tot asa. Ma bucur ca am primit acest
-proiect, a fost fun. Sarbatori fericite, dupa ce au trecut!
+Feedback: O extindere frumoasa a etapei 1, a fost accesibila, placuta si bine
+explicata. Multumim!
