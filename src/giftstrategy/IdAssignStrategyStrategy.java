@@ -3,7 +3,6 @@ package giftstrategy;
 import database.Database;
 import entities.Child;
 import entities.Gift;
-import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -12,18 +11,29 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
     private static final int YOUNGADULTAGE = 18;
     private Database database;
 
-    public IdAssignStrategyStrategy(Database database) {
+    public IdAssignStrategyStrategy(final Database database) {
         this.database = database;
     }
 
+    /**
+     *
+     * @return
+     */
     public Database getDatabase() {
         return database;
     }
 
-    public void setDatabase(Database database) {
+    /**
+     *
+     * @param database
+     */
+    public void setDatabase(final Database database) {
         this.database = database;
     }
 
+    /**
+     *
+     */
     @Override
     public void getGiftsByStrategy() {
         ArrayList<Child> children = database.getChildren();
@@ -31,7 +41,11 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
         addGifts(children);
     }
 
-    public void addGifts(ArrayList<Child> children) {
+    /**
+     *
+     * @param children
+     */
+    public void addGifts(final ArrayList<Child> children) {
         for (Child child : children) {
             // getting the budget of every child
             Double childAssignedBudget = child.getAssignedBudget();
@@ -79,6 +93,10 @@ public class IdAssignStrategyStrategy implements AssignGiftsStrategy {
         }
     }
 
+    /**
+     *
+     * @param preferenceGifts
+     */
     private static void sortPreferenceGifts(final ArrayList<Gift>
                                                     preferenceGifts) {
         Comparator<Gift> comparator;

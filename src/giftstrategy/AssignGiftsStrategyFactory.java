@@ -4,8 +4,14 @@ import common.Constants;
 import database.Database;
 
 public class AssignGiftsStrategyFactory {
-    public static AssignGiftsStrategy createStrategy(Database database,
-                                                     String strategy) {
+    /**
+     *
+     * @param database
+     * @param strategy
+     * @return
+     */
+    public static AssignGiftsStrategy createStrategy(final Database database,
+                                                     final String strategy) {
         return switch (strategy) {
             case Constants.ID -> new IdAssignStrategyStrategy(database);
             case Constants.NICESCORE -> new NiceScoreStrategy(database);

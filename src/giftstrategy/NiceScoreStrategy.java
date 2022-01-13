@@ -2,7 +2,6 @@ package giftstrategy;
 
 import database.Database;
 import entities.Child;
-import entities.City;
 import entities.Gift;
 
 import java.util.ArrayList;
@@ -14,32 +13,45 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
     private static final int YOUNGADULTAGE = 18;
     private Database database;
 
-    public NiceScoreStrategy(Database database) {
+    public NiceScoreStrategy(final Database database) {
         this.database = database;
     }
 
+    /**
+     *
+     * @return
+     */
     public Database getDatabase() {
         return database;
     }
 
-    public void setDatabase(Database database) {
+    /**
+     *
+     * @param database
+     */
+    public void setDatabase(final Database database) {
         this.database = database;
     }
 
+    /**
+     *
+     */
     @Override
     public void getGiftsByStrategy() {
         ArrayList<Child> children = new ArrayList<>(database.getChildren());
         children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
         sortChildrenAverage(children);
-        System.out.println(database.getSantaBudget());
         addGifts(children);
         sortChildrenId(children);
         database.setChildren(children);
     }
 
-    public void addGifts(ArrayList<Child> children) {
+    /**
+     *
+     * @param children
+     */
+    public void addGifts(final ArrayList<Child> children) {
         for (Child child : children) {
-            System.out.println(child);
             // getting the budget of every child
             Double childAssignedBudget = child.getAssignedBudget();
             // getting every preference of every child
@@ -61,7 +73,6 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
                 // the cheapest
                 sortPreferenceGifts(preferenceGifts);
                 for (Gift gift : preferenceGifts) {
-                    System.out.println(gift);
                     int quantity = gift.getQuantity();
                     childAssignedBudget -= gift.getPrice();
                     if (!child.getReceivedGifts().contains(gift)
@@ -77,7 +88,7 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
         }
     }
 
-    private void sortChildrenId(ArrayList<Child> children) {
+    private void sortChildrenId(final ArrayList<Child> children) {
         Comparator<Child> comparator = Comparator.comparing(Child::getId);
         children.sort(comparator);
     }
@@ -92,7 +103,7 @@ public class NiceScoreStrategy implements AssignGiftsStrategy {
     private static void sortChildrenAverage(final ArrayList<Child> children) {
         Collections.sort(children, new Comparator<Child>() {
             @Override
-            public int compare(Child o1, Child o2) {
+            public int compare(final Child o1, final Child o2) {
                 if (Objects.equals(o1.getAverageScore(), o2.getAverageScore())) {
                     return Integer.compare(o2.getId(), o1.getId());
                 } else {
