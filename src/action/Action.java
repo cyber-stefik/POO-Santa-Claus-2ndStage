@@ -29,23 +29,19 @@ public final class Action {
     }
 
     /**
+     * Solves the project, calls methods and the writer.
      * @param database database which contains info about every entity
      * @param writer function to write in the output json
      * @throws IOException in case of exceptions to reading / writing
      */
     public static void solve(final Database database, final Writer writer,
                              final String filePath2) throws IOException {
-        // getting the children list from database
-        ArrayList<Child> children = new ArrayList<>(database.getChildren());
-        // getting the gifts list from database
-        ArrayList<Gift> gifts = new ArrayList<>(database.getPresents());
+        ArrayList<Child> children = database.getChildren();
+        ArrayList<Gift> gifts = database.getPresents();
         // an ArrayList<ArrayList<Child>> to write in the final json
         ArrayList<Children> annualChildren = new ArrayList<>();
-        // removing the young adults fom the children list
         children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
-        // method for solving the round zero
         roundZero(database);
-        // a copy of the children list
         ArrayList<Child> children1 = new ArrayList<>();
         for (Child child : children) {
             // copying every child from the children list in a new list, so the
@@ -56,44 +52,30 @@ public final class Action {
         // add the copy list into the final array
         annualChildren.add(new Children(children1));
         for (int i = 1; i <= database.getNumberOfYears(); i++) {
-            // every child becomes 1 year older
             growUp(children);
-            // removing the young adults fom the children list
+            // removing the young adults fom the children list every year
+            // of the simulation
             children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
-            // getting the annual changes
             AnnualChange annualChange = database.getAnnualChanges().get(i - 1);
-            // add new children if they exist in the annual change
             if (annualChange.getNewChildren() != null) {
                 addNewChildren(children, annualChange);
             }
-            // update the children if there are child updates
             if (annualChange.getChildrenUpdates() != null) {
                 updateChildren(children, annualChange);
             }
-            // add new gifts if there are new gifts
             if (annualChange.getNewGifts() != null) {
                 gifts.addAll(annualChange.getNewGifts());
             }
             // set the new santa budget
             database.setSantaBudget(annualChange.getNewSantaBudget());
             Double santaBudget = database.getSantaBudget();
-            // niceScoreSum is the sum of every child's average score
             Double niceScoreSum = calculateNiceScore(children);
-            // calculating the assigned budget for every child
-            Double budgetUnit = santaBudget / niceScoreSum;
-            for (Child child : children) {
-                double assignedBudget = checkElf(budgetUnit, child);
-                child.setAssignedBudget(assignedBudget);
-            }
-            // updating the children and gifts
-            database.setChildren(children);
-            database.setPresents(gifts);
-            // method to give gifts to children
+            setChildAssignedBudget(database, niceScoreSum);
             receiveGifts(database, i - 1);
             ArrayList<Child> children2 = new ArrayList<>();
             for (Child child : children) {
-                // copying every child from the children list in a new list, so the
-                // database remains intact for the next rounds
+                // copying every child from the children list in a new list,
+                // so the database remains intact for the next rounds
                 children2.add(new Child(child));
                 child.getReceivedGifts().removeAll(child.getReceivedGifts());
             }
@@ -105,10 +87,14 @@ public final class Action {
         writer.writeFile(annualChildren1, filePath2);
     }
 
+    /**
+     * It solves the round zero, when every child has the average score his
+     * first score.
+     * @param database contains information about every entity
+     *
+     */
     private static void roundZero(final Database database) {
-        // getting the children from the database
         ArrayList<Child> children = database.getChildren();
-        // calculating the sum of every child's average score
         Double niceScoreSum = 0.0;
         // removing the young adults fom the children list
         children.removeIf(child -> child.getAge() > YOUNGADULTAGE);
@@ -119,7 +105,7 @@ public final class Action {
                 child.setAverageScore((double) BABY);
             } else {
                 // for the rest of the children, the average score will be
-                // the first score from the score history list
+                // the first score from the score history list +- the bonus
                 double averageScore = child.getNiceScoreHistory().get(0);
                 averageScore += averageScore * child.getNiceScoreBonus()
                                 / PERCENT;
@@ -129,17 +115,16 @@ public final class Action {
                 }
                 child.setAverageScore(averageScore);
             }
-            // adding to the sum
+            // adding to the final sum
             niceScoreSum += child.getAverageScore();
         }
         // setting the budget for every child
         setChildAssignedBudget(database, niceScoreSum);
-        // method to give every child gifts
         receiveGifts(database, -1);
     }
 
     /**
-     *
+     * Every child becomes one year older.
      * @param children children list with every child getting one year older
      */
     private static void growUp(final ArrayList<Child> children) {
@@ -149,7 +134,7 @@ public final class Action {
     }
 
     /**
-     *
+     * Adds the new children to the database, if there are any.
      * @param children children list from the database
      * @param annualChange the annual change at the round i - 1
      */
@@ -163,27 +148,24 @@ public final class Action {
     }
 
     /**
-     *
+     * Updates children every year.
      * @param children children list from the database
      * @param annualChange the annual change at the round i - 1
      */
     private static void updateChildren(final ArrayList<Child> children,
                                        final AnnualChange annualChange) {
-        // getting every child update
         for (ChildUpdate childUpdate : annualChange
                 .getChildrenUpdates()) {
-            // getting every child
             for (Child child : children) {
                 // searching for the child with the given id in the
                 // annual change
                 if (child.getId() == childUpdate.getId()) {
-                    // if the score is null in the update, i used -1.0
-                    // and verify now if the annual change score is not null
+                    // updates the score if the given score in the annual change
+                    // is not null
                     if (childUpdate.getNiceScore() != -1.0) {
                         child.getNiceScoreHistory().add(childUpdate
                                 .getNiceScore());
                     }
-                    // verify if the annual change gift preferences exist
                     if (childUpdate.getGiftsPreference() != null) {
                         for (int j = childUpdate.getGiftsPreference()
                                 .size() - 1; j >= 0; j--) {
@@ -197,7 +179,6 @@ public final class Action {
                                     childUpdate.getGiftsPreference().get(j);
                             child.getGiftsPreferences()
                                     .remove(newPreference);
-                            // add the new gift preference
                             child.getGiftsPreferences().add(0,
                                     newPreference);
                         }
@@ -209,7 +190,7 @@ public final class Action {
     }
 
     /**
-     *
+     * Calculates and returns the nice score sum of every child.
      * @param children children list from the database
      * @return the nice score sum of every child's average score
      */
@@ -262,25 +243,23 @@ public final class Action {
     }
 
     /**
-     *
+     * Sets the assigned budget for every child.
      * @param database database which contains info about every entity
      * @param niceScoreSum sum of every child's average score
      */
     private static void setChildAssignedBudget(final Database database,
                                                final Double niceScoreSum) {
-        // children list from the database
         ArrayList<Child> children = database.getChildren();
         // calculating the budget unit with the given formula
         Double budgetUnit = database.getSantaBudget() / niceScoreSum;
         for (Child child : children) {
-            // assign the budget for every child with the given formula
             double assignedBudget = checkElf(budgetUnit, child);
             child.setAssignedBudget(assignedBudget);
         }
     }
 
     /**
-     *
+     * Adds or takes to/from the assigned budget.
      * @param budgetUnit the budget unit to calculate the assigned budget
      * @param child child which will have the assigned budget calculated
      *              if he has an elf
@@ -298,21 +277,18 @@ public final class Action {
     }
 
     /**
-     *
+     * Gives gifts to children based on a strategy and an elf.
+     * Year -1 means the round zero is happening.
      * @param database database which contains info about every entity
      */
     private static void receiveGifts(final Database database, final int
                                      year) {
-        // getting every child
         ArrayList<Child> children = database.getChildren();
-        // if the year is -1, it means that the round 0 is happening and the
-        // children will receive gifts by id
         if (year == -1) {
             AssignGiftsStrategy assignGiftsStrategy = AssignGiftsStrategyFactory
                     .createStrategy(database, "id");
             assignGiftsStrategy.getGiftsByStrategy();
         } else {
-            // otherwise, call the strategy design pattern to give gifts
             String strategy = database.getAnnualChanges().get(year)
                             .getStrategy();
             AssignGiftsStrategy assignGiftsStrategy = AssignGiftsStrategyFactory

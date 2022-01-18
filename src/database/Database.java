@@ -32,7 +32,7 @@ public final class Database {
     }
 
     /**
-     *
+     * Adds data from the input to the database
      * @param input input I created in InputLoader from json files
      */
     public void addData(final Input input) {

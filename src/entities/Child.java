@@ -36,6 +36,10 @@ public final class Child {
         this.elf = childBuilder.elf;
     }
 
+    /**
+     * Copy constructor
+     * @param child
+     */
     public Child(final Child child) {
         this.id = child.getId();
         this.lastName = child.getLastName();

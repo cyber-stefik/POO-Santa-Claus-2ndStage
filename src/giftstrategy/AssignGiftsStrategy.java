@@ -2,7 +2,7 @@ package giftstrategy;
 
 public interface AssignGiftsStrategy {
     /**
-     * Method will give children gifts based on the strategy
+     * Gives gifts to children based on a strategy.
      */
     void getGiftsByStrategy();
 }

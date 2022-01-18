@@ -37,23 +37,25 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
     }
 
     /**
-     *
+     * Gives gifts to children based on nice score city strategy.
      */
     @Override
     public void getGiftsByStrategy() {
         ArrayList<Child> children = new ArrayList<>(database.getChildren());
         ArrayList<City> cities = new ArrayList<>();
-        // get every city
         getCities(children, cities);
-        // counts the number of inhabitans for average score
         countInhabitants(children, cities);
-        // calculates the average scire of every city, sorts the cities by
-        // it and sorts lexicographic if 2 cities have the same score
         calculateAverage(children, cities);
-        // give gifts to children
         addGifts(children, cities);
     }
 
+    /**
+     * Calculates the average score of a city and sort them by the score.
+     * If there are two cities with the same score, they will be sorted.
+     * lexicographic
+     * @param children
+     * @param cities
+     */
     private void calculateAverage(final ArrayList<Child> children,
                                   final ArrayList<City> cities) {
         for (City city : cities) {
@@ -77,13 +79,12 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
     }
 
     /**
-     *
+     * Gives gifts to children based on their preferences
      * @param children list of children
      * @param cities list of cities
      */
     public void addGifts(final ArrayList<Child> children,
                          final ArrayList<City> cities) {
-        // get every child from every city
         for (City city : cities) {
             for (Child child : children) {
                 // if the child doesn't live in the city, continue to the next
@@ -91,34 +92,28 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
                 if (!city.getName().equals(child.getCity())) {
                     continue;
                 }
-                // getting the budget of every child
                 Double childAssignedBudget = child.getAssignedBudget();
-                // getting every preference of every child
                 for (String preference : child.getGiftsPreferences()) {
                     // array in which I'll add gifts in the same category
                     ArrayList<Gift> preferenceGifts = new ArrayList<>();
                     for (Gift gift : database.getPresents()) {
-                        // verify if the gift category is in the preferred category
-                        // of the child
                         if (gift.getCategory().contains(preference)) {
-                            // verify if the budget allows santa to give the gift
-                            // and if he has the quantity to do that
+                            // verify if the budget allows santa to give the
+                            // gift and if he has the quantity to do that
                             if (childAssignedBudget >= gift.getPrice()
                                     && gift.getQuantity() > 0) {
                                 preferenceGifts.add(gift);
                             }
                         }
                     }
-                    // sort the preferenceGifts by price, so the first one will be
-                    // the cheapest
                     sortPreferenceGifts(preferenceGifts);
                     for (Gift gift : preferenceGifts) {
                         int quantity = gift.getQuantity();
-                        // update the assigned budget
                         childAssignedBudget -= gift.getPrice();
                         int ok = 1;
                         // verify if the child already has been given the gift
-                        // and if the santa budget allowed santa to give the gift
+                        // and if the santa budget allowed santa to
+                        // give the gift
                         if (!child.getReceivedGifts().contains(gift)
                             && childAssignedBudget >= 0) {
 
@@ -132,11 +127,8 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
                                     break;
                                 }
                             }
-                            // give the gift
                             if (ok == 1) {
-                                // add the cheapest gift
                                 child.getReceivedGifts().add(gift);
-                                // update the quantity
                                 gift.setQuantity(quantity - 1);
                             }
                         }
@@ -147,6 +139,10 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
         }
     }
 
+    /**
+     * Sorts by the price, so the first gift will be the cheapest.
+     * @param preferenceGifts
+     */
     private static void sortPreferenceGifts(final ArrayList<Gift>
                                                     preferenceGifts) {
         Comparator<Gift> comparator;
@@ -154,11 +150,11 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
         preferenceGifts.sort(comparator);
     }
 
-    private void sortChildrenId(final ArrayList<Child> children) {
-        Comparator<Child> comparator = Comparator.comparing(Child::getId);
-        children.sort(comparator);
-    }
-
+    /**
+     * Counts the number of children in every city.
+     * @param children children from the database
+     * @param cities all cities
+     */
     private void countInhabitants(final ArrayList<Child> children,
                                   final ArrayList<City> cities) {
         for (City city : cities) {
@@ -170,6 +166,11 @@ public class NiceScoreCityStrategy implements AssignGiftsStrategy {
         }
     }
 
+    /**
+     * It finds every city that a child could live in.
+     * @param children children from the database
+     * @param cities arraylist which will contain the cities
+     */
     private void getCities(final ArrayList<Child> children,
                            final ArrayList<City> cities) {
         // add every city
